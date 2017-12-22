@@ -3,7 +3,7 @@
 ##################################################
 # GNU Radio Python Flow Graph
 # Title: Top Block
-# Generated: Fri Dec 22 01:16:10 2017
+# Generated: Fri Dec 22 23:53:40 2017
 ##################################################
 
 from gnuradio import analog
@@ -17,8 +17,7 @@ from gnuradio.filter import firdes
 from optparse import OptionParser
 import cc1111
 import math
-import osmosdr
-import time
+import urmetEasyRead
 
 
 class top_block(gr.top_block):
@@ -41,29 +40,24 @@ class top_block(gr.top_block):
         self.offset_sign2 = offset_sign2 = (-34780*grab_freq)/868200000
         self.offset_sign1 = offset_sign1 = (11600*grab_freq)/868200000
         self.gain_mu = gain_mu = 0.4 / samples_per_symbol
+        self.fsk_deviation_hz = fsk_deviation_hz = 5200
         self.average_window = average_window = int((input_rate* window_symbols / symbol_rate))
 
         ##################################################
         # Blocks
         ##################################################
-        self.rtlsdr_source_0 = osmosdr.source( args="numchan=" + str(1) + " " + '' )
-        self.rtlsdr_source_0.set_sample_rate(samp_rate)
-        self.rtlsdr_source_0.set_center_freq(868283000, 0)
-        self.rtlsdr_source_0.set_freq_corr(0, 0)
-        self.rtlsdr_source_0.set_dc_offset_mode(0, 0)
-        self.rtlsdr_source_0.set_iq_balance_mode(0, 0)
-        self.rtlsdr_source_0.set_gain_mode(True, 0)
-        self.rtlsdr_source_0.set_gain(10, 0)
-        self.rtlsdr_source_0.set_if_gain(20, 0)
-        self.rtlsdr_source_0.set_bb_gain(20, 0)
-        self.rtlsdr_source_0.set_antenna('', 0)
-        self.rtlsdr_source_0.set_bandwidth(0, 0)
-          
+        self.urmetEasyRead_urmetEasyRead_0 = urmetEasyRead.urmetEasyRead()
         self.digital_correlate_access_code_bb_0 = digital.correlate_access_code_bb('11010011100100011101001110010001', 1)
         self.digital_clock_recovery_mm_xx_0 = digital.clock_recovery_mm_ff(samples_per_symbol, 0.25*gain_mu*gain_mu, 0.5, gain_mu, 0.02)
         self.digital_binary_slicer_fb_0_0 = digital.binary_slicer_fb()
-        self.blocks_file_sink_0_0 = blocks.file_sink(gr.sizeof_char*1, '/home/fraschi/packet.data', False)
-        self.blocks_file_sink_0_0.set_unbuffered(False)
+        self.cc1111_cc1111_packet_decoder_0 = cc1111.cc1111_packet_decoder(gr.msg_queue(1),False, True, True, True)
+        self.blocks_uchar_to_float_0 = blocks.uchar_to_float()
+        self.blocks_throttle_0 = blocks.throttle(gr.sizeof_gr_complex*1, samp_rate,True)
+        self.blocks_null_sink_1 = blocks.null_sink(gr.sizeof_char*1)
+        self.blocks_float_to_complex_0 = blocks.float_to_complex(1)
+        self.blocks_file_source_0 = blocks.file_source(gr.sizeof_char*1, '/home/fraschi/rpiRadio/buoni/500k/g005_868.283M_500k.cu8-20171222_132343.data', False)
+        self.blocks_deinterleave_0 = blocks.deinterleave(gr.sizeof_float*1, 1)
+        self.blocks_add_const_vxx_0 = blocks.add_const_vcc((-128-128j, ))
         self.analog_simple_squelch_cc_0 = analog.simple_squelch_cc(40, 1)
         self.analog_quadrature_demod_cf_0 = analog.quadrature_demod_cf(1)
         self.FXFIR1 = filter.freq_xlating_fir_filter_ccc(decimation, (1, ), -14e3, samp_rate)
@@ -74,18 +68,26 @@ class top_block(gr.top_block):
         self.connect((self.FXFIR1, 0), (self.analog_simple_squelch_cc_0, 0))    
         self.connect((self.analog_quadrature_demod_cf_0, 0), (self.digital_clock_recovery_mm_xx_0, 0))    
         self.connect((self.analog_simple_squelch_cc_0, 0), (self.analog_quadrature_demod_cf_0, 0))    
+        self.connect((self.blocks_add_const_vxx_0, 0), (self.blocks_throttle_0, 0))    
+        self.connect((self.blocks_deinterleave_0, 0), (self.blocks_float_to_complex_0, 0))    
+        self.connect((self.blocks_deinterleave_0, 1), (self.blocks_float_to_complex_0, 1))    
+        self.connect((self.blocks_file_source_0, 0), (self.blocks_uchar_to_float_0, 0))    
+        self.connect((self.blocks_float_to_complex_0, 0), (self.blocks_add_const_vxx_0, 0))    
+        self.connect((self.blocks_throttle_0, 0), (self.FXFIR1, 0))    
+        self.connect((self.blocks_uchar_to_float_0, 0), (self.blocks_deinterleave_0, 0))    
+        self.connect((self.cc1111_cc1111_packet_decoder_0, 0), (self.urmetEasyRead_urmetEasyRead_0, 0))    
         self.connect((self.digital_binary_slicer_fb_0_0, 0), (self.digital_correlate_access_code_bb_0, 0))    
         self.connect((self.digital_clock_recovery_mm_xx_0, 0), (self.digital_binary_slicer_fb_0_0, 0))    
-        self.connect((self.digital_correlate_access_code_bb_0, 0), (self.blocks_file_sink_0_0, 0))    
-        self.connect((self.rtlsdr_source_0, 0), (self.FXFIR1, 0))    
+        self.connect((self.digital_correlate_access_code_bb_0, 0), (self.cc1111_cc1111_packet_decoder_0, 0))    
+        self.connect((self.urmetEasyRead_urmetEasyRead_0, 0), (self.blocks_null_sink_1, 0))    
 
     def get_samp_rate(self):
         return self.samp_rate
 
     def set_samp_rate(self, samp_rate):
         self.samp_rate = samp_rate
-        self.rtlsdr_source_0.set_sample_rate(self.samp_rate)
         self.set_input_rate(self.samp_rate/self.decimation)
+        self.blocks_throttle_0.set_sample_rate(self.samp_rate)
 
     def get_decimation(self):
         return self.decimation
@@ -167,6 +169,12 @@ class top_block(gr.top_block):
         self.gain_mu = gain_mu
         self.digital_clock_recovery_mm_xx_0.set_gain_omega(0.25*self.gain_mu*self.gain_mu)
         self.digital_clock_recovery_mm_xx_0.set_gain_mu(self.gain_mu)
+
+    def get_fsk_deviation_hz(self):
+        return self.fsk_deviation_hz
+
+    def set_fsk_deviation_hz(self, fsk_deviation_hz):
+        self.fsk_deviation_hz = fsk_deviation_hz
 
     def get_average_window(self):
         return self.average_window

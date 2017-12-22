@@ -3,9 +3,10 @@
 ##################################################
 # GNU Radio Python Flow Graph
 # Title: Top Block
-# Generated: Thu Dec 21 20:38:20 2017
+# Generated: Fri Dec 22 23:53:40 2017
 ##################################################
 
+import sys
 from gnuradio import analog
 from gnuradio import blocks
 from gnuradio import digital
@@ -18,7 +19,7 @@ from optparse import OptionParser
 import cc1111
 import math
 import urmetEasyRead
-import sys
+
 
 class top_block(gr.top_block):
 
@@ -54,9 +55,7 @@ class top_block(gr.top_block):
         self.blocks_uchar_to_float_0 = blocks.uchar_to_float()
         self.blocks_throttle_0 = blocks.throttle(gr.sizeof_gr_complex*1, samp_rate,True)
         self.blocks_null_sink_1 = blocks.null_sink(gr.sizeof_char*1)
-        self.blocks_null_sink_0 = blocks.null_sink(gr.sizeof_gr_complex*1)
         self.blocks_float_to_complex_0 = blocks.float_to_complex(1)
-        self.blocks_file_source_1 = blocks.file_source(gr.sizeof_gr_complex*1,'/home/fraschi/rpiRadio/buoni/freqNew-2M/gfile209.data' , False)
         self.blocks_file_source_0 = blocks.file_source(gr.sizeof_char*1, sys.argv[1], False)
         self.blocks_deinterleave_0 = blocks.deinterleave(gr.sizeof_float*1, 1)
         self.blocks_add_const_vxx_0 = blocks.add_const_vcc((-128-128j, ))
@@ -74,7 +73,6 @@ class top_block(gr.top_block):
         self.connect((self.blocks_deinterleave_0, 0), (self.blocks_float_to_complex_0, 0))    
         self.connect((self.blocks_deinterleave_0, 1), (self.blocks_float_to_complex_0, 1))    
         self.connect((self.blocks_file_source_0, 0), (self.blocks_uchar_to_float_0, 0))    
-        self.connect((self.blocks_file_source_1, 0), (self.blocks_null_sink_0, 0))    
         self.connect((self.blocks_float_to_complex_0, 0), (self.blocks_add_const_vxx_0, 0))    
         self.connect((self.blocks_throttle_0, 0), (self.FXFIR1, 0))    
         self.connect((self.blocks_uchar_to_float_0, 0), (self.blocks_deinterleave_0, 0))    

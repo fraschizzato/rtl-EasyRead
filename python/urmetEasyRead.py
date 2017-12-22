@@ -43,8 +43,6 @@ class urmetEasyRead(gr.sync_block):
 
     def work(self, input_items, output_items):
         datatime = ""
-        ts = time.time()
-        current_time=datetime.datetime.fromtimestamp(ts).strftime('%d-%m-%y_%H:%M:%S')
         data = binascii.hexlify(bytearray(input_items[0]))
         data = ' '.join(data[i:i+2] for i in range(0,len(data),2))
         data = data.split(" ")
@@ -58,7 +56,7 @@ class urmetEasyRead(gr.sync_block):
         else:
            unknown_data=data[9] + " " + data[10] + " " + data[11] + " " + data[12] + " " + data[13] + " " + data[14]+" "+data[15]+" "+data[16]+" "+data[17]+" "+data[18]+" "+data[19]+" "+data[20]+" "+data[21]+" "+data[22]+" "+data[23]+" "+data[24]+" "+data[25]+" "+data[26]+" "+data[27]+ " " + data[28]
         #Print Hex
-        print pretype, " ", type , " ", ulei, " ",datatime,"  ",unknown_data, "-", current_time
+        print pretype, " ", type , " ", ulei, " ",datatime,"  ",unknown_data
         hexdata= pretype+" "+type +" "+ulei+" "+datatime+"  "+unknown_data
         decimal=unknown_data.split(" ")
         decimalOut=""
@@ -67,22 +65,22 @@ class urmetEasyRead(gr.sync_block):
             decimalOut+=" " + str(decimal[i])
         #Print Decimal
         if str(type) == "53":
-           print pretype, " ", type," ", ulei, " ",datatime, " ", decimalOut, "-", current_time
+           print pretype, " ", type," ", ulei, " ",datatime, " ", decimalOut
         else:
-           print pretype, " ", type," ", ulei, " ",datatime, " ", decimalOut, "-", current_time
+           print pretype, " ", type," ", ulei, " ",datatime, " ", decimalOut
         decdata=pretype+" "+type+" "+ulei+" "+datatime+" "+decimalOut
         #file maker
-        filename="urmetEasyRead-"+str(type)+"-"+str(current_time)+".hack"
+        filename="urmetEasyRead-"+str(type)+"-.pre"
         file = open(filename,"w")
         file.write(hexdata+"\r\n")
         file.write(decdata+"\r\n")
         file.close()
         #domoConnector
-        #filename="urmetEasyRead-"+str(type)+"-"+str(current_time)
-        #file = open(filename,"w")
-        #file.write(hexdata)
-        #file.write(decdata)
-        #file.close()
+        filename2="urmetEasyRead-"+str(type)+".value"
+        file2 = open(filename2,"w")
+        file2.write(hexdata+"\r\n")
+        file2.write(decdata+"\r\n")
+        file2.close()
         # grc workaround
         in0 = input_items[0]
         return len(input_items[0])
